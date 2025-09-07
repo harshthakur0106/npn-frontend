@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -61,9 +61,31 @@ const marketTrendsData = [
 export default function PlanPage() {
   const [targetAudience, setTargetAudience] = useState("Small business owners in retail")
   const planResult = useResponseStore((s) => s.responseByKey["plan:result"] || "")
+  const campaignTargetAudience = useResponseStore((s) => s.responseByKey["campaign:targetAudience"] || "")
   const setResponse = useResponseStore((s) => s.setResponse)
+  const clearResponse = useResponseStore((s) => s.clearResponse)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [targetAudienceInfo, setTargetAudienceInfo] = useState<{
+    targetAudience: string
+    clusterName: string
+    customerCount: number
+    clusterKey: string
+  } | null>(null)
+
+  // Load target audience info from analytics page
+  useEffect(() => {
+    if (campaignTargetAudience) {
+      try {
+        const parsed = JSON.parse(campaignTargetAudience)
+        setTargetAudienceInfo(parsed)
+        // Pre-fill target audience with cluster info
+        setTargetAudience(`${parsed.clusterName} - ${parsed.targetAudience} (${parsed.customerCount.toLocaleString()} customers)`)
+      } catch (e) {
+        console.error("Failed to parse campaign target audience:", e)
+      }
+    }
+  }, [campaignTargetAudience])
 
   const handlePlan = async () => {
     if (!targetAudience.trim()) {
@@ -107,6 +129,31 @@ export default function PlanPage() {
             <h1 className="text-3xl font-bold text-foreground">Marketing Plan Generator</h1>
           </div>
           <p className="text-muted-foreground">Create targeted marketing strategies with data-driven insights</p>
+          
+          {targetAudienceInfo && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-blue-600" />
+                <span className="font-medium text-blue-900">Selected Target Audience</span>
+              </div>
+              <div className="text-sm text-blue-800">
+                <div className="font-medium">{targetAudienceInfo.clusterName} - {targetAudienceInfo.targetAudience}</div>
+                <div className="text-blue-600">{targetAudienceInfo.customerCount.toLocaleString()} customers</div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={() => {
+                  setTargetAudienceInfo(null)
+                  clearResponse("campaign:targetAudience")
+                  setTargetAudience("Small business owners in retail")
+                }}
+              >
+                Clear Target Audience
+              </Button>
+            </div>
+          )}
         </div>
 
       

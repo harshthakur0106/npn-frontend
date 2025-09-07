@@ -1,0 +1,13 @@
+{
+  "secondary": { "Cluster1 (%)": 52.14, "Cluster2 (%)": 68.02, "Cluster3 (%)": 38.17 },
+  "primary": { "Cluster1 (%)": 38.87, "Cluster2 (%)": 11.52, "Cluster3 (%)": 6.46 },
+  "tertiary": { "Cluster1 (%)": 6.87, "Cluster2 (%)": 16.04, "Cluster3 (%)": 52.24 },
+  "married": { "Cluster1 (%)": 76.83, "Cluster2 (%)": 54.58, "Cluster3 (%)": 65.85 },
+  "default": { "Cluster1 (%)": 0.61, "Cluster2 (%)": 0.64, "Cluster3 (%)": 0.9 },
+  "housing": { "Cluster1 (%)": 62.28, "Cluster2 (%)": 55.85, "Cluster3 (%)": 52.99 },
+  "loan": { "Cluster1 (%)": 15.62, "Cluster2 (%)": 14.51, "Cluster3 (%)": 14.89 },
+  "blue-collar": { "Cluster1 (%)": 73.23, "Cluster2 (%)": 34.65, "Cluster3 (%)": 53.1 },
+  "self-employed": { "Cluster1 (%)": 3.73, "Cluster2 (%)": 11.36, "Cluster3 (%)": 6.96 },
+  "services": { "Cluster1 (%)": 3.67, "Cluster2 (%)": 28.42, "Cluster3 (%)": 6.96 },
+  "retired": { "Cluster1 (%)": 18.11, "Cluster2 (%)": 0.11, "Cluster3 (%)": 0.05 }
+}

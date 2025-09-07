@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LoadingSpinner } from "@/components/loading-spinner"
 import { callApi, formatApiResponse } from "@/lib/api"
 import Link from "next/link"
-import { ArrowLeft, Mail, Send, MessageSquare, TrendingUp, Clock, CheckCircle, AlertCircle } from "lucide-react"
+import { ArrowLeft, Mail, Send, MessageSquare, TrendingUp, Clock, CheckCircle, AlertCircle, Target } from "lucide-react"
 import { useResponseStore } from "@/hooks/use-response-store"
 import {
   LineChart,
@@ -77,8 +77,15 @@ export default function SendPage() {
   const setResponse = useResponseStore((s) => s.setResponse)
   const clearResponse = useResponseStore((s) => s.clearResponse)
   const generatedWriteEmail = useResponseStore((s) => s.responseByKey["write:email"] || "")
+  const campaignTargetAudience = useResponseStore((s) => s.responseByKey["campaign:targetAudience"] || "")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [targetAudienceInfo, setTargetAudienceInfo] = useState<{
+    targetAudience: string
+    clusterName: string
+    customerCount: number
+    clusterKey: string
+  } | null>(null)
 
   // Prefill email body from generated Write email if user hasn't typed
   useEffect(() => {
@@ -87,6 +94,25 @@ export default function SendPage() {
       setEmailData((prev) => ({ ...prev, body: generatedWriteEmail }))
     }
   }, [generatedWriteEmail])
+
+  // Load target audience info from analytics page
+  useEffect(() => {
+    if (campaignTargetAudience) {
+      try {
+        const parsed = JSON.parse(campaignTargetAudience)
+        setTargetAudienceInfo(parsed)
+        // Pre-fill email subject with cluster info
+        if (!emailData.subject.trim()) {
+          setEmailData(prev => ({
+            ...prev,
+            subject: `Campaign for ${parsed.clusterName} - ${parsed.targetAudience}`
+          }))
+        }
+      } catch (e) {
+        console.error("Failed to parse campaign target audience:", e)
+      }
+    }
+  }, [campaignTargetAudience])
 
   const handleSendEmail = async () => {
     if (!emailData.receiver.trim() || !emailData.subject.trim() || !emailData.body.trim()) {
@@ -150,6 +176,30 @@ export default function SendPage() {
             <h1 className="text-3xl font-bold text-foreground">Send Messages</h1>
           </div>
           <p className="text-muted-foreground">Send and track your marketing campaigns with real-time analytics</p>
+          
+          {targetAudienceInfo && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-blue-600" />
+                <span className="font-medium text-blue-900">Target Audience</span>
+              </div>
+              <div className="text-sm text-blue-800">
+                <div className="font-medium">{targetAudienceInfo.clusterName} - {targetAudienceInfo.targetAudience}</div>
+                <div className="text-blue-600">{targetAudienceInfo.customerCount.toLocaleString()} customers</div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={() => {
+                  setTargetAudienceInfo(null)
+                  clearResponse("campaign:targetAudience")
+                }}
+              >
+                Clear Target Audience
+              </Button>
+            </div>
+          )}
         </div>
 
 

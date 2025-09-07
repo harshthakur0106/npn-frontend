@@ -18,6 +18,12 @@ type ResponseState = {
 	// Optional chat-style history per key
 	messagesByKey: Record<string, Message[]>
 
+	// Lightweight local metrics overlay (persists) for immediate UI feedback
+	counters: {
+		emailsSentDelta: number
+		notificationsSentDelta: number
+	}
+
 	setResponse: (key: string, value: string) => void
 	clearResponse: (key: string) => void
 	addMessage: (
@@ -25,6 +31,10 @@ type ResponseState = {
 		message: { role: ChatRole; content: string; id?: string; createdAt?: number }
 	) => void
 	clearMessages: (key: string) => void
+	// Metrics counters
+	incrementEmailsSent: (by?: number) => void
+	incrementNotificationsSent: (by?: number) => void
+	resetCounters: () => void
 	resetAll: () => void
 }
 
@@ -37,6 +47,7 @@ export const useResponseStore = create<ResponseState>()(
 		(set, get) => ({
 			responseByKey: {},
 			messagesByKey: {},
+			counters: { emailsSentDelta: 0, notificationsSentDelta: 0 },
 
 			setResponse: (key, value) =>
 				set((state) => ({
@@ -72,7 +83,15 @@ export const useResponseStore = create<ResponseState>()(
 					return { messagesByKey: next }
 				}),
 
-			resetAll: () => set({ responseByKey: {}, messagesByKey: {} }),
+			incrementEmailsSent: (by = 1) =>
+				set((state) => ({ counters: { ...state.counters, emailsSentDelta: state.counters.emailsSentDelta + by } })),
+
+			incrementNotificationsSent: (by = 1) =>
+				set((state) => ({ counters: { ...state.counters, notificationsSentDelta: state.counters.notificationsSentDelta + by } })),
+
+			resetCounters: () => set((state) => ({ counters: { emailsSentDelta: 0, notificationsSentDelta: 0 } })),
+
+			resetAll: () => set({ responseByKey: {}, messagesByKey: {}, counters: { emailsSentDelta: 0, notificationsSentDelta: 0 } }),
 		}),
 		{
 			name: 'response-store',
